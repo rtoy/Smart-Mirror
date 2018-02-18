@@ -16,7 +16,7 @@ from contextlib import contextmanager
 
 LOCALE_LOCK = threading.Lock()
 
-ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
+ui_locale = 'en_US' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
@@ -116,7 +116,7 @@ class Weather(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N, padx=20)
         self.currentlyLbl = Label(self, font=('Helvetica', medium_text_size), fg="white", bg="black")
         self.currentlyLbl.pack(side=TOP, anchor=W)
-        self.forecastLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
+        self.forecastLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black", justify=LEFT, wraplength=500)
         self.forecastLbl.pack(side=TOP, anchor=W)
         self.locationLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
@@ -213,7 +213,7 @@ class News(Frame):
         Frame.__init__(self, parent, *args, **kwargs)
         self.config(bg='black')
         self.title = 'News' # 'News' is more internationally generic
-        self.newsLbl = Label(self, text=self.title, font=('Helvetica', medium_text_size), fg="white", bg="black")
+        self.newsLbl = Label(self, text=self.title, font=('Helvetica', medium_text_size), fg="white", bg="black", justify=LEFT, wraplength=200)
         self.newsLbl.pack(side=TOP, anchor=W)
         self.headlinesContainer = Frame(self, bg="black")
         self.headlinesContainer.pack(side=TOP)
@@ -226,8 +226,10 @@ class News(Frame):
                 widget.destroy()
             if news_country_code == None:
                 headlines_url = "https://news.google.com/news?ned=us&output=rss"
+                #headlines_url = "https://news.google.com/news?ned=us&gl=US&hl=en"
             else:
                 headlines_url = "https://news.google.com/news?ned=%s&output=rss" % news_country_code
+                #headlines_url = "https://news.google.com/news?ned=us&gl=US&hl=enhttps://news.google.com/news?ned=%s" % news_country_code
 
             feed = feedparser.parse(headlines_url)
 
@@ -255,7 +257,7 @@ class NewsHeadline(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N)
 
         self.eventName = event_name
-        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', small_text_size), fg="white", bg="black")
+        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', small_text_size), fg="white", bg="black", justify=LEFT, wraplength=200)
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
 
@@ -304,13 +306,16 @@ class FullscreenWindow:
         self.tk.bind("<Escape>", self.end_fullscreen)
         # clock
         self.clock = Clock(self.topFrame)
-        self.clock.pack(side=RIGHT, anchor=N, padx=100, pady=60)
+        #self.clock.pack(side=RIGHT, anchor=N, padx=100, pady=60)
+        self.clock.pack(side=RIGHT, anchor=N, padx=10, pady=10)
         # weather
         self.weather = Weather(self.topFrame)
-        self.weather.pack(side=LEFT, anchor=N, padx=100, pady=60)
+        #self.weather.pack(side=LEFT, anchor=N, padx=100, pady=60)
+        self.weather.pack(side=LEFT, anchor=N, padx=10, pady=10)
         # news
         self.news = News(self.bottomFrame)
-        self.news.pack(side=LEFT, anchor=S, padx=100, pady=60)
+        #self.news.pack(side=LEFT, anchor=S, padx=100, pady=60)
+        self.news.pack(side=LEFT, anchor=S, padx=10, pady=10)
         # calender - removing for now
         # self.calender = Calendar(self.bottomFrame)
         # self.calender.pack(side = RIGHT, anchor=S, padx=100, pady=60)
@@ -327,4 +332,6 @@ class FullscreenWindow:
 
 if __name__ == '__main__':
     w = FullscreenWindow()
+    # Start full screen
+    w.toggle_fullscreen(w)
     w.tk.mainloop()
