@@ -19,7 +19,7 @@ from os.path import expanduser
 
 LOCALE_LOCK = threading.Lock()
 
-ui_locale = 'en_US' # e.g. 'fr_FR' fro French, '' as default
+ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
