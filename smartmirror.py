@@ -14,12 +14,20 @@ import feedparser
 from PIL import Image, ImageTk
 from contextlib import contextmanager
 
+# So we can exapnd tilde paths
+from os.path import expanduser
+
 LOCALE_LOCK = threading.Lock()
 
 ui_locale = 'en_US' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
+# The file that contains the weather API token.  This should be in
+# your home directory.
+weather_api_token_file = '.smart-mirror-weather-api-token.txt'
+# This is now read from the ;file, so don't set this; it will get
+# overwritten anyway.
 weather_api_token = '<TOKEN>' # create account at https://darksky.net/dev/
 weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
 weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
@@ -134,6 +142,9 @@ class Weather(Frame):
 
     def get_weather(self):
         try:
+            # Read the API token from a file
+            with open(expanduser('~/') + weather_api_token_file) as token_file:
+                weather_api_token = token_file.read().replace("\n", "")
 
             if latitude is None and longitude is None:
                 # get location
