@@ -244,7 +244,9 @@ class News(Frame):
 
             feed = feedparser.parse(headlines_url)
 
-            for post in feed.entries[0:5]:
+            # Skip the first entry because it just says this RSS feed
+            # URL is deprecated.  Need to fix that!
+            for post in feed.entries[1:9]:
                 headline = NewsHeadline(self.headlinesContainer, post.title)
                 headline.pack(side=TOP, anchor=W)
         except Exception as e:
