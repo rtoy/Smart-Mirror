@@ -384,7 +384,7 @@ class DistanceSensor:
     def Ping(self):
         # Ensure Trigger pin is set low and give the sensor some time to settle.
         GPIO.output(self.TRIG, False)
-        print "Waiting For Sensor to Settle"
+        # print "Waiting For Sensor to Settle"
         time.sleep(1e-3)
 
         # 10 us pulse to trigger the module
@@ -408,7 +408,7 @@ class DistanceSensor:
         distance = pulse_duration * 17150
         distance = round(distance, 2)
 
-        print "Distance: ", distance, " cm"
+        # print "Distance: ", distance, " cm"
 
         # Triggers should be at least 50 us apart, so wait for 50 us
         time.sleep(50e-6)
@@ -422,7 +422,7 @@ class DistanceSensor:
         d.append(self.Ping())
         # Take the median
         d.sort()
-        print "dist: ", d, ", avg: ", d[1], " cm"
+        print "dist: ", d, ", median: ", d[1], " cm"
         return d[1]
 
 if __name__ == '__main__':
