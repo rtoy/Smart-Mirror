@@ -17,6 +17,22 @@ from contextlib import contextmanager
 # So we can exapnd tilde paths
 from os.path import expanduser
 
+# GPIO support for the motion/distance sensor
+
+# See
+# https://www.modmypi.com/blog/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi
+# for instructions on how to connect up the HC-SR04 sensor.  This code
+# also based the example from modmypi.
+#
+# See also
+# https://www.mpja.com/download/hc-sr04_ultrasonic_module_user_guidejohn.pdf
+# for some specs on the sensor.
+import RPi.GPIO as GPIO
+import time
+
+# So we can turn the screensaver off
+import subprocess
+
 LOCALE_LOCK = threading.Lock()
 
 ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
@@ -81,6 +97,7 @@ class Clock(Frame):
         self.date1 = ''
         self.dateLbl = Label(self, text=self.date1, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.dateLbl.pack(side=TOP, anchor=E)
+        self.sensor = DistanceSensor()
         self.tick()
 
     def tick(self):
@@ -102,10 +119,17 @@ class Clock(Frame):
             if date2 != self.date1:
                 self.date1 = date2
                 self.dateLbl.config(text=date2)
+            distance_cm = self.sensor.getDistance()
+            # If the distance is close enough, turn off the
+            # screensaver so we can see the display.
+            if distance_cm < 100:
+                subprocess.call(["xscreensaver-command", "-deactivate"])
+
             # calls itself every 200 milliseconds
             # to update the time display as needed
             # could use >200 ms, but display gets jerky
-            self.timeLbl.after(200, self.tick)
+            #self.timeLbl.after(200, self.tick)
+            self.timeLbl.after(1000, self.tick)
 
 
 class Weather(Frame):
@@ -342,6 +366,64 @@ class FullscreenWindow:
         self.state = False
         self.tk.attributes("-fullscreen", False)
         return "break"
+
+class DistanceSensor:
+    def __init__(self, *args, **kwargs):
+        GPIO.setmode(GPIO.BCM)
+
+        # Name the pins. GPIO23 (pin 16) is TRIG and GPI24 (pin 18) is ECHO.
+        self.TRIG = 23
+        self.ECHO = 24
+
+        print "Distance Measurements in Progress"
+
+        # Set up ports as inputs/outpus as appropriate
+        GPIO.setup(self.TRIG, GPIO.OUT)
+        GPIO.setup(self.ECHO, GPIO.IN)
+
+    def Ping(self):
+        # Ensure Trigger pin is set low and give the sensor some time to settle.
+        GPIO.output(self.TRIG, False)
+        print "Waiting For Sensor to Settle"
+        time.sleep(1e-3)
+
+        # 10 us pulse to trigger the module
+        GPIO.output(self.TRIG, True)
+        time.sleep(10e-6)
+        GPIO.output(self.TRIG, False)
+
+        # Listen for the echo.
+
+        pulse_start = time.time()
+        pulse_end = time.time()
+        # Record our time when the ECHO goes high
+        while GPIO.input(self.ECHO) == 0:
+          pulse_start = time.time()
+
+        # Record the time when ECHO goes low
+        while GPIO.input(self.ECHO) == 1:
+          pulse_end = time.time()
+
+        pulse_duration = pulse_end - pulse_start
+        distance = pulse_duration * 17150
+        distance = round(distance, 2)
+
+        print "Distance: ", distance, " cm"
+
+        # Triggers should be at least 50 us apart, so wait for 50 us
+        time.sleep(50e-6)
+
+        return distance
+
+    def getDistance(self):
+        d = []
+        d.append(self.Ping())
+        d.append(self.Ping())
+        d.append(self.Ping())
+        # Take the median
+        d.sort()
+        print "dist: ", d, ", avg: ", d[1], " cm"
+        return d[1]
 
 if __name__ == '__main__':
     w = FullscreenWindow()
