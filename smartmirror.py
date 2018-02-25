@@ -32,6 +32,7 @@ import time
 
 # So we can turn the screensaver off
 import subprocess
+import sys
 
 LOCALE_LOCK = threading.Lock()
 
@@ -98,6 +99,21 @@ class Clock(Frame):
         self.dateLbl = Label(self, text=self.date1, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.dateLbl.pack(side=TOP, anchor=E)
         self.sensor = DistanceSensor()
+        # If we see something within this distance, turn on the
+        # screen, in cm.
+        self.trigger_distance = 100
+        # Timer interval, ms.
+        self.timeout = 1000
+        # How long before the screen saver blanks the screen, in ms.
+        # Doesn't have to be exactly the blank interval, but should be
+        # somewhat less than the interval.
+        self.screensave_time = 9*60*1000
+        # How long before we need to check the distance again.
+        # Intended to bypass the distance measurements when we know
+        # the screen is on.  If the countdown value is 0 (or less), we
+        # need to take measurements.
+        self.count_down = self.screensave_time/self.timeout
+
         self.tick()
 
     def tick(self):
@@ -119,12 +135,19 @@ class Clock(Frame):
             if date2 != self.date1:
                 self.date1 = date2
                 self.dateLbl.config(text=date2)
-            distance_cm = self.sensor.getDistance()
-            # If the distance is close enough, turn off the
-            # screensaver so we can see the display.
-            if distance_cm < 100:
-                subprocess.call(["xscreensaver-command", "-deactivate"])
-
+            self.count_down = max(0, self.count_down - 1)
+            print time.time(), "[" , time.strftime("%H:%M:%S"), "]: count_down = ", self.count_down
+            # Count down has reached 0, so we need to take measurements.
+            if self.count_down == 0:
+                distance_cm = self.sensor.getDistance()
+                # If the distance is close enough, turn off the
+                # screensaver so we can see the display.
+                if distance_cm < self.trigger_distance:
+                    subprocess.call(["xscreensaver-command", "-deactivate"])
+                    # Don't do measurements until we reached this
+                    # number of calls.
+                    self.count_down = self.screensave_time/self.timeout
+            sys.stdout.flush()
             # calls itself every 200 milliseconds
             # to update the time display as needed
             # could use >200 ms, but display gets jerky
@@ -395,15 +418,26 @@ class DistanceSensor:
         # Listen for the echo.
 
         pulse_start = time.time()
-        pulse_end = time.time()
-        # Record our time when the ECHO goes high
-        while GPIO.input(self.ECHO) == 0:
-          pulse_start = time.time()
+        current = pulse_start
+        # Record our time when the ECHO goes high, but don't wait forever
+        while GPIO.input(self.ECHO) == 0 and current - pulse_start < 1000:
+          current = time.time()
 
+        if current - pulse_start >= 1000:
+            print "*** Didn't get start of echo!"
+            return 10*100
+
+        pulse_start = current
+        pulse_end = current
+        
         # Record the time when ECHO goes low
-        while GPIO.input(self.ECHO) == 1:
-          pulse_end = time.time()
+        while GPIO.input(self.ECHO) == 1 and current - pulse_end < 1000:
+          current = time.time()
 
+        if current - pulse_end >= 1000:
+            print "*** Didn't get end of echo!"
+            return 10*100
+        pulse_end = current
         pulse_duration = pulse_end - pulse_start
         distance = pulse_duration * 17150
         distance = round(distance, 2)
