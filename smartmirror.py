@@ -54,6 +54,7 @@ xlarge_text_size = 64 #94
 large_text_size = 44 #48
 medium_text_size = 28
 small_text_size = 18
+smaller_text_size = 12
 
 @contextmanager
 def setlocale(name): #thread proof function to work with locale
@@ -271,7 +272,7 @@ class News(Frame):
         Frame.__init__(self, parent, *args, **kwargs)
         self.config(bg='black')
         self.title = 'News' # 'News' is more internationally generic
-        self.newsLbl = Label(self, text=self.title, font=('Helvetica', medium_text_size), fg="white", bg="black")
+        self.newsLbl = Label(self, text=self.title, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.newsLbl.pack(side=TOP, anchor=W)
         self.headlinesContainer = Frame(self, bg="black")
         self.headlinesContainer.pack(side=TOP)
@@ -317,7 +318,7 @@ class NewsHeadline(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N)
 
         self.eventName = event_name
-        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', small_text_size), fg="white", bg="black", justify=LEFT, wraplength=800)
+        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', smaller_text_size), fg="white", bg="black", justify=LEFT, wraplength=800)
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
 
