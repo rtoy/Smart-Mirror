@@ -51,9 +51,9 @@ weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of
 latitude = None # Set this if IP location lookup does not work for you (must be a string)
 longitude = None # Set this if IP location lookup does not work for you (must be a string)
 xlarge_text_size = 64 #94
-large_text_size = 36 #48
-medium_text_size = 24 #28
-small_text_size = 12 #18
+large_text_size = 44 #48
+medium_text_size = 28
+small_text_size = 18
 
 @contextmanager
 def setlocale(name): #thread proof function to work with locale
@@ -101,7 +101,7 @@ class Clock(Frame):
         self.sensor = DistanceSensor()
         # If we see something within this distance, turn on the
         # screen, in cm.
-        self.trigger_distance = 100
+        self.trigger_distance = 150
         # Timer interval, ms.
         self.timeout = 1000
         # How long before the screen saver blanks the screen, in ms.
