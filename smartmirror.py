@@ -104,7 +104,7 @@ class Clock(Frame):
         # screen, in cm.
         self.trigger_distance = 150
         # Timer interval, ms.
-        self.timeout = 1000
+        self.timeout = 200
         # How long before the screen saver blanks the screen, in ms.
         # Doesn't have to be exactly the blank interval, but should be
         # somewhat less than the interval.
@@ -153,7 +153,7 @@ class Clock(Frame):
             # to update the time display as needed
             # could use >200 ms, but display gets jerky
             #self.timeLbl.after(200, self.tick)
-            self.timeLbl.after(1000, self.tick)
+            self.timeLbl.after(self.timeout, self.tick)
 
 
 class Weather(Frame):
