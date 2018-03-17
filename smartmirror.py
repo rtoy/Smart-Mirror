@@ -138,7 +138,7 @@ class Clock(Frame):
                 self.dateLbl.config(text=date2)
             self.count_down = max(0, self.count_down - 1)
             # Only print this out every 100 calls
-            if (self.count_dowm % 100 == 0) :
+            if (self.count_down % 100 == 0) :
                 print time.time(), "[" , time.strftime("%H:%M:%S"), "]: count_down = ", self.count_down
             # Count down has reached 0, so we need to take measurements.
             if self.count_down == 0:
